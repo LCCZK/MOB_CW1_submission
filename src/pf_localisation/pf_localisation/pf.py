@@ -91,24 +91,25 @@ class PFLocaliser(PFLocaliserBase):
         return init_particlecloud
 
     def update_particle_cloud(self, scan:LaserScan):
-        scan.ranges = self.valid_scan(scan)
-        # self.red_info_logging(str(scan))      
-        self.particle_importance = self.update_particle_importance(scan)
-        if (self.PC_converged and ((self.get_PC_pose_std(self.particlecloud) > self.POSE_STD_THRESHOLD_TO_NOISY_RESAMPLE) or 
-                                self.mean_particle_weight < self.MEAN_PARTICLE_WEIGHT_THRESHOLD_TO_NOISY_RESAMPLE )):
-            self.particlecloud, self.particle_importance = self.systematic_resampling(scan, self.NOISY_RESAMPLE_NOISE)
-            self.PC_converged = False
-            self.red_info_logging("Pose std threshold reached doing noisy resampling..")
-            self.red_info_logging("current mean is %f"%self.mean_particle_weight)
+        if scan.ranges != None:
+            scan.ranges = self.valid_scan(scan)
+            # self.red_info_logging(str(scan))      
+            self.particle_importance = self.update_particle_importance(scan)
+            if (self.PC_converged and ((self.get_PC_pose_std(self.particlecloud) > self.POSE_STD_THRESHOLD_TO_NOISY_RESAMPLE) or 
+                                    self.mean_particle_weight < self.MEAN_PARTICLE_WEIGHT_THRESHOLD_TO_NOISY_RESAMPLE )):
+                self.particlecloud, self.particle_importance = self.systematic_resampling(scan, self.NOISY_RESAMPLE_NOISE)
+                self.PC_converged = False
+                self.red_info_logging("Pose std threshold reached doing noisy resampling..")
+                self.red_info_logging("current mean is %f"%self.mean_particle_weight)
 
-        elif (self.get_PC_pose_std(self.particlecloud) > self.POSE_STD_THRESHOLD_TO_RESAMPLE):
-            self.particlecloud, self.particle_importance = self.systematic_resampling(scan, self.RESAMPLE_NOISE)
-            self.blue_info_logging("Doing normal resampaling")
-            self.blue_info_logging("current mean is %f"%self.mean_particle_weight)
+            elif (self.get_PC_pose_std(self.particlecloud) > self.POSE_STD_THRESHOLD_TO_RESAMPLE):
+                self.particlecloud, self.particle_importance = self.systematic_resampling(scan, self.RESAMPLE_NOISE)
+                self.blue_info_logging("Doing normal resampaling")
+                self.blue_info_logging("current mean is %f"%self.mean_particle_weight)
 
-        else:
-            self.yellow_info_logging("Pose std threshold not reached no resampling needed..")
-            self.PC_converged = True
+            else:
+                self.yellow_info_logging("Pose std threshold not reached no resampling needed..")
+                self.PC_converged = True
     
     def valid_scan(self, scan:LaserScan):
         clean_laser_range = []
